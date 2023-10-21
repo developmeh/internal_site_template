@@ -1,9 +1,22 @@
 #!/bin/bash
 
+function portable_sed() {
+    local pattern=$1
+    local file=$2
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "$pattern" "$file"
+    else
+        # Linux and others
+        sed -i "$pattern" "$file"
+    fi
+}
+
 # Loop through all .md files
 find . -type f -name "*.md" | while read -r file; do
     # Use sed to perform the replacement in-place
-    sed -i 's/\](\/content\/\([^)]*\))/](\1)/g' "$file"
+    portable_sed 's/\](\/content\/\([^)]*\))/](\1)/g' "$file"
 done
 
 echo "Files updated!"
