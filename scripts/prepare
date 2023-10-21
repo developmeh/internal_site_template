@@ -1,0 +1,6 @@
+#!/bin/bash
+
+./gen_index
+find . -type f -name "*.md" -exec bash -c './frontmatter "$0"' {} \;
+./unwrap_content
+

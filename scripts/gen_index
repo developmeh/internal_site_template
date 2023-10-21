@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Iterate over all directories
+find . -type d | while read -r dir; do
+    dir_name=$(basename "${dir}")
+    depth=$(echo "$dir" | tr -cd '/' | awk '{ print length }')
+    # Check if the file exists
+    if [ -f "${dir}/_index.md" ]; then
+        echo "file exists ${dir_name}"
+        # Use sed to replace {{title}} with the directory name
+        sed -i "s/{{title}}/$dir_name/g" "${dir}/_index.md"
+        sed -i "s/{{weight}}/$depth/g" "${dir}/_index.md"
+        # rm "${dir}/_index.md"
+    else
+        if [ -f "${dir}/README.md" ]; then
+            echo "moving readme to _index: ${dir_name}"
+            cat ../_index.tpl.md > ${dir}/temp.txt
+            cat ${dir}/README.md >> ${dir}/temp.txt
+            cp ${dir}/temp.txt ${dir}/_index.md
+            rm ${dir}/temp.txt
+            rm ${dir}/README.md
+        else
+            echo "creating _index: ${dir_name}"
+            # If the file doesn't exist, create it and populate with the directory name
+            cp ../_index.tpl.md "${dir}/_index.md"
+        fi
+
+        sed -i "s/{{title}}/$dir_name/g" "${dir}/_index.md"
+        sed -i "s/{{weight}}/$depth/g" "${dir}/_index.md"
+    fi
+done

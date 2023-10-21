@@ -1,0 +1,26 @@
+#!/bin/bash
+
+filepath="$1"
+filename=$(basename -- "$filepath")
+title="${filename%.*}"  # Remove the extension from the filename
+
+echo $1
+
+if grep '^+++$' "$filepath"; then
+    echo "Skipping $filepath as it already has frontmatter."
+    exit 1
+fi
+
+# Using awk to prepend frontmatter
+awk -v title="$title" '
+BEGIN {
+    print "+++"
+    print "title = \"" title "\""
+    print "template = \"page.html\""
+    print "+++"
+    print ""  # adding an empty line after frontmatter
+}
+{print}
+' "$filepath" > "${filepath}.tmp" && mv "${filepath}.tmp" "$filepath"
+
+# find . -type f -name "*.md" -exec bash -c '../frontmatter "$0"' {} \;

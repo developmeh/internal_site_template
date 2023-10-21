@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Loop through all .md files
+find . -type f -name "*.md" | while read -r file; do
+    # Use sed to perform the replacement in-place
+    sed -i 's/\](\/content\/\([^)]*\))/](\1)/g' "$file"
+done
+
+echo "Files updated!"
