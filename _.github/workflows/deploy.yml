@@ -1,4 +1,4 @@
-name: Deploy Developmeh.com
+name: Deploy Some Site
 run-name: ${{ github.actor }} will build and deploy the site 🚀
 on:
   push:
@@ -16,10 +16,25 @@ jobs:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
+      - name: Check out template code
         uses: actions/checkout@v3
-      # - name: setup theme
-      #   run: git subtree add --prefix themes/zola_easydocs_theme git@github.com:developmeh/zola_easydocs_theme.git master --squash
+        with:
+          repository: <TEMPLATE REPO>
+          ssh-key: ${{ secrets.INTERNAL_TEMPLATE_RO }}
+      - name: Checkout content
+        uses: actions/checkout@v3
+        with:
+          path: content
+      - name: drop .git
+        run: rm -rf content/.git
+      - name: flatten content
+        run: cp -rf content/content/* content
+      - name: remove old root
+        run: rm -rf content/content
+      - name: set site name
+        run: sed -i "s/{{base_url}}/<THE URL>/g" "config.toml"
+      - name: prepare content
+        run: make prepare
       - name: Install Nix
         uses: cachix/install-nix-action@v22
         with:
@@ -31,7 +46,7 @@ jobs:
       - name: Upload artifact
         # Automatically uploads an artifact from the './_site' directory by default
         uses: actions/upload-pages-artifact@v2
-  Deploy-Pages:
+  Publish-Pages:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
